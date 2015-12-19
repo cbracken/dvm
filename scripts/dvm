@@ -56,6 +56,12 @@ dvm_install() {
     return 1
   fi
 
+  curl=$(which curl)
+  if [[ ! -x "$curl" ]]; then
+    echo "ERROR: curl is required but was not found on PATH."
+    return 1
+  fi
+
   local version=$1
   shift 
   

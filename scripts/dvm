@@ -87,7 +87,6 @@ dvm_install() {
   version=$(<dart-sdk/version)
 
   # Move SDK under $DVM_ROOT/darts.
-  _create_darts_dir
   if [[ ! -d "$DVM_ROOT/darts/$version" ]]; then
     mv dart-sdk "$DVM_ROOT/darts/$version"
   fi

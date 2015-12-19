@@ -76,7 +76,13 @@ dvm_install() {
 
   # Download SDK.
   local base_uri="$DL_URI/$version"
-  curl -O "$base_uri/sdk/dartsdk-linux-x64-release.zip"
+  curl -f -O "$base_uri/sdk/dartsdk-linux-x64-release.zip"
+  if [[ $? -ne 0 ]]; then
+    echo "ERROR: unable to download Dart SDK. Are you sure that version exists?"
+    popd > /dev/null
+    rm -rf $tmpdir
+    return 1
+  fi
   unzip dartsdk-linux-x64-release.zip
   version=$(<dart-sdk/version)
 
@@ -87,17 +93,21 @@ dvm_install() {
   fi
 
   # Download Dartium.
-  curl -O "$base_uri/dartium/dartium-linux-x64-release.zip"
-  unzip dartium-linux-x64-release.zip
-  if [[ ! -d "$DVM_ROOT/darts/$version/dartium" ]]; then
-    local dartium_dir="$(find . -maxdepth 1 ! -path . -type d)"
-    mv "$dartium_dir" "$DVM_ROOT/darts/$version/dartium"
-  fi
+  curl -f -O "$base_uri/dartium/dartium-linux-x64-release.zip"
+  if [[ $? -ne 0 ]]; then
+    echo "ERROR: unable to download Dartium. But hey, at least you got the SDK."
+  else
+    unzip dartium-linux-x64-release.zip
+    if [[ ! -d "$DVM_ROOT/darts/$version/dartium" ]]; then
+      local dartium_dir="$(find . -maxdepth 1 ! -path . -type d)"
+      mv "$dartium_dir" "$DVM_ROOT/darts/$version/dartium"
+    fi
 
-  # Create Dartium symlink.
-  pushd "$DVM_ROOT/darts/$version/bin" > /dev/null
-  ln -s ../dartium/chrome dartium
-  popd > /dev/null
+    # Create Dartium symlink.
+    pushd "$DVM_ROOT/darts/$version/bin" > /dev/null
+    ln -s ../dartium/chrome dartium
+    popd > /dev/null
+  fi
 
   # Clean up.
   popd > /dev/null

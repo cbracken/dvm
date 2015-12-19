@@ -64,6 +64,11 @@ dvm_install() {
 
   local version=$1
   shift 
+
+  if [[ -d "$DVM_ROOT/darts/$version" ]]; then
+    echo "ERROR: version $version is already installed"
+    return 1
+  fi
   
   # Create tmp workspace.
   tmpdir=$(mktemp -d)

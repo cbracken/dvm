@@ -12,6 +12,7 @@ _dvm_usage() {
   echo "Commands:"
   echo "   install    Install a Dart version"
   echo "   list       List installed Dart versions"
+  echo "   listall    List all available Dart versions"
   echo "   use        Select a Dart version to use"
   return 1
 }
@@ -48,6 +49,14 @@ dvm_list() {
   for v in $(find "$DVM_ROOT/darts" -maxdepth 1 ! -path "$DVM_ROOT/darts" -type d); do
     echo $(basename $v)
   done
+}
+
+dvm_listall() {
+  local api_uri="https://www.googleapis.com/storage/v1/b/dart-archive/o"
+  local query="prefix=channels/stable/release/&delimiter=/"
+  curl -s "$api_uri?$query" | \
+      grep "channels/stable/release/" | \
+      sed -e "s@.*/stable/release/@@;s@/.*@@"
 }
 
 dvm_install() {
@@ -158,6 +167,8 @@ dvm() {
     dvm_use "$@"
   elif [[ "$cmd" == "list" ]]; then
     dvm_list "$@"
+  elif [[ "$cmd" == "listall" ]]; then
+    dvm_listall "$@"
   elif [[ "$cmd" == "install" ]]; then
     dvm_install "$@"
   else

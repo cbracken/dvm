@@ -17,9 +17,8 @@ _dvm_usage() {
 }
 
 _dvm_create_dirs() {
-  if [[ ! -d "$DVM_ROOT/darts" ]]; then
-    mkdir -p "$DVM_ROOT/darts"
-  fi
+  mkdir -p "$DVM_ROOT/darts" > /dev/null 2>&1
+  mkdir -p "$DVM_ROOT/environments" > /dev/null 2>&1
 }
 
 dvm_use() {
@@ -29,7 +28,14 @@ dvm_use() {
   fi
 
   local version=$1
+  local default=$2
   shift
+
+  if [[ "$default" == "--default" ]]; then
+    local defaults="$DVM_ROOT/environments/default"
+    echo 'export DVM_ROOT; DVM_ROOT="$DVM_ROOT"' > "$defaults"
+    echo "PATH=\"\$DVM_ROOT/darts/$version/bin:\$PATH\"" >> "$defaults"
+  fi
 
   if [[ ! -d "$DVM_ROOT/darts/$version" ]]; then
     echo "ERROR: version not found. Try 'dvm install $version'"
@@ -114,3 +120,7 @@ dvm() {
     _dvm_usage
   fi
 }
+
+if [[ -e "$DVM_ROOT/environments/default" ]]; then
+  . "$DVM_ROOT/environments/default"
+fi

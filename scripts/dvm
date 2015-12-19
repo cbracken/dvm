@@ -21,6 +21,19 @@ _dvm_create_dirs() {
   mkdir -p "$DVM_ROOT/environments" > /dev/null 2>&1
 }
 
+# Removes $1 from PATH.
+_dvm_path_remove() {
+  PATH=$(echo $PATH | sed "s:$1::;s/::/:/;s/:$//")
+}
+
+# Adds or moves $1 to beginning of PATH.
+_dvm_path_prepend() {
+  _dvm_path_remove "$1"
+  if [ -d "$1" ]; then
+    export PATH="$1:$PATH"
+  fi
+}
+
 dvm_use() {
   if [[ $# < 1 ]]; then
     echo "usage: dvm use <version> [--default]"
@@ -41,7 +54,7 @@ dvm_use() {
     echo "ERROR: version not found. Try 'dvm install $version'"
     return 1
   fi
-  PATH="$DVM_ROOT/darts/$version/bin:$PATH"
+  _dvm_path_prepend "$DVM_ROOT/darts/$version/bin"
 }
 
 dvm_list() {

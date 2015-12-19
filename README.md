@@ -24,3 +24,15 @@ Commands:
    * `list`: list installed Dart versions
    * `use`: select a Dart version to use
    * `install`: install a Dart version
+
+## Uninstalling
+
+To remove dvm and all installed Dart versions:
+
+```
+rm -rf ~/.dvm
+```
+
+## Credits
+
+Inspired by [gvm](https://github.com/moovweb/gvm).

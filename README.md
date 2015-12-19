@@ -22,6 +22,7 @@ fi
 Commands:
 
    * `list`: list installed Dart versions
+   * `listall`: list all available Dart versions
    * `use`: select a Dart version to use
    * `install`: install a Dart version
 

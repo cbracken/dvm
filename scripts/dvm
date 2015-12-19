@@ -163,17 +163,23 @@ dvm() {
   fi
   cmd=$1
   shift
-  if [[ "$cmd" == "use" ]]; then
-    dvm_use "$@"
-  elif [[ "$cmd" == "list" ]]; then
-    dvm_list "$@"
-  elif [[ "$cmd" == "listall" ]]; then
-    dvm_listall "$@"
-  elif [[ "$cmd" == "install" ]]; then
-    dvm_install "$@"
-  else
-    _dvm_usage
-  fi
+  case $cmd in
+    use)
+      dvm_use "$@"
+      ;;
+    list)
+      dvm_list "$@"
+      ;;
+    listall)
+      dvm_listall "$@"
+      ;;
+    install)
+      dvm_install "$@"
+      ;;
+    *)
+      _dvm_usage
+      ;;
+  esac
 }
 
 if [[ -e "$DVM_ROOT/environments/default" ]]; then

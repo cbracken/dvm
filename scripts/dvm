@@ -4,7 +4,6 @@
 # author: Chris Bracken <chris@bracken.jp>
 
 DVM_ROOT="$HOME/.dvm"
-DL_URI="https://storage.googleapis.com/dart-archive/channels/stable/release"
 
 _dvm_usage() {
   echo "usage: dvm <command> [<args>]"
@@ -99,7 +98,8 @@ dvm_install() {
   pushd $tmpdir > /dev/null
 
   # Download SDK.
-  local base_uri="$DL_URI/$version"
+  local dl_uri="https://storage.googleapis.com/dart-archive/channels/stable/release"
+  local base_uri="$dl_uri/$version"
   curl -f -O "$base_uri/sdk/$sdk_archive"
   if [[ $? -ne 0 ]]; then
     echo "ERROR: unable to download Dart SDK. Are you sure that version exists?"

@@ -1,0 +1,90 @@
+#!/bin/bash
+#
+# Dart Version Manager
+# author: Chris Bracken <chris@bracken.jp>
+
+DVM_ROOT="$HOME/.dvm"
+DL_URI="https://storage.googleapis.com/dart-archive/channels/stable/release"
+
+_dvm_create_dirs() {
+  if [[ ! -d "$DVM_ROOT/darts" ]]; then
+    mkdir -p "$DVM_ROOT/darts"
+  fi
+}
+
+dvm_use() {
+  local version=$1
+  shift
+
+  if [[ ! -d "$DVM_ROOT/darts/$version" ]]; then
+    echo "ERROR: version not found. Try 'dvm install $version'"
+    return 1
+  fi
+  PATH="$DVM_ROOT/darts/$version/bin:$PATH"
+}
+
+dvm_list() {
+  for v in $(find "$DVM_ROOT/darts" -maxdepth 1 ! -path "$DVM_ROOT/darts" -type d); do
+    echo $(basename $v)
+  done
+}
+
+dvm_install() {
+  local version=$1
+  shift 
+  
+  # Create tmp workspace.
+  tmpdir=$(mktemp -d)
+  pushd $tmpdir > /dev/null
+
+  # Download SDK.
+  local base_uri="$DL_URI/$version"
+  curl -O "$base_uri/sdk/dartsdk-linux-x64-release.zip"
+  unzip dartsdk-linux-x64-release.zip
+  version=$(<dart-sdk/version)
+
+  # Move SDK under $DVM_ROOT/darts.
+  _create_darts_dir
+  if [[ ! -d "$DVM_ROOT/darts/$version" ]]; then
+    mv dart-sdk "$DVM_ROOT/darts/$version"
+  fi
+
+  # Download Dartium.
+  curl -O "$base_uri/dartium/dartium-linux-x64-release.zip"
+  unzip dartium-linux-x64-release.zip
+  if [[ ! -d "$DVM_ROOT/darts/$version/dartium" ]]; then
+    local dartium_dir="$(find . -maxdepth 1 ! -path . -type d)"
+    mv "$dartium_dir" "$DVM_ROOT/darts/$version/dartium"
+  fi
+
+  # Create Dartium symlink.
+  pushd "$DVM_ROOT/darts/$version/bin" > /dev/null
+  ln -s ../dartium/chrome dartium
+  popd > /dev/null
+
+  # Clean up.
+  popd > /dev/null
+  rm -rf $tmpdir
+}
+
+dvm() {
+  if [[ -z "$DVM_ROOT" ]]; then
+    echo "ERROR: DVM_ROOT not set. Please source \$DVM_ROOT/scripts/dvm."
+    return 1
+  fi
+  if [[ ! -d "$DVM_ROOT" ]]; then
+    echo "ERROR: DVM_ROOT does not exist. Please reinstall DVM."
+    return 1
+  fi
+  _dvm_create_dirs
+
+  cmd=$1
+  shift
+  if [[ "$cmd" == "use" ]]; then
+    dvm_use "$@"
+  elif [[ "$cmd" == "list" ]]; then
+    dvm_list "$@"
+  elif [[ "$cmd" == "install" ]]; then
+    dvm_install "$@"
+  fi
+}

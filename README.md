@@ -3,7 +3,7 @@ dvm: Dart Version Manager
 
 A minimal tool for managing Dart SDK versions.
 
-## Installation
+## Installing
 
 In your home directory, run:
 ```

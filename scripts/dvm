@@ -124,9 +124,10 @@ dvm_install() {
   version=$(<dart-sdk/version)
 
   # Move SDK under $DVM_ROOT/darts.
-  if [[ ! -d "$DVM_ROOT/darts/$version" ]]; then
-    mv dart-sdk "$DVM_ROOT/darts/$version"
+  if [[ -d "$DVM_ROOT/darts/$version" ]]; then
+    rm -rf "$DVM_ROOT/darts/$version"
   fi
+  mv dart-sdk "$DVM_ROOT/darts/$version"
 
   # Download Dartium.
   curl -f -O "$base_uri/dartium/$dartium_archive"

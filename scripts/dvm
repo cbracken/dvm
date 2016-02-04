@@ -44,10 +44,19 @@ dvm_use() {
   local default=$2
   shift
 
+  if [[ "$version" == "current" ]]; then
+    echo "ERROR: http://goo.gl/Mzdy5s"
+    return 1
+  fi
+
   if [[ "$default" == "--default" ]]; then
     local defaults="$DVM_ROOT/environments/default"
     echo 'export DVM_ROOT; DVM_ROOT="$DVM_ROOT"' > "$defaults"
     echo "PATH=\"\$DVM_ROOT/darts/$version/bin:\$PATH\"" >> "$defaults"
+    if [[ -e "$DVM_ROOT/darts/current" ]]; then
+      rm -f "$DVM_ROOT/darts/current"
+    fi
+    ln -s "$DVM_ROOT/darts/$version" "$DVM_ROOT/darts/current"
   fi
 
   if [[ ! -d "$DVM_ROOT/darts/$version" ]]; then

@@ -9,6 +9,7 @@ _dvm_usage() {
   echo "usage: dvm <command> [<args>]"
   echo ""
   echo "Commands:"
+  echo "   alias      Manage Dart version aliases"
   echo "   install    Install a Dart version"
   echo "   list       List installed Dart versions"
   echo "   listall    List all available Dart versions"
@@ -34,6 +35,73 @@ _dvm_path_prepend() {
   fi
 }
 
+_dvm_alias_usage() {
+  echo "usage: dvm alias <create|delete|list> [<args>]"
+}
+
+dvm_alias_list() {
+  for v in $(find "$DVM_ROOT/darts" -maxdepth 1 ! -path "$DVM_ROOT/darts" -type l); do
+    echo $(basename $v)
+  done
+}
+
+dvm_alias_create() {
+  if [[ $# < 2 ]]; then
+    echo "usage: dvm alias create <alias> <version>"
+    return 1
+  fi
+  # check for existing alias/version
+  if [[ -h "$DVM_ROOT/darts/$1" ]]; then
+    echo "ERROR: alias $1 already exists"
+    return 1
+  elif [[ -d "$DVM_ROOT/darts/$1" ]]; then
+    echo "ERROR: version $1 already exists"
+    return 1
+  fi
+  # ensure target exists
+  if [[ ! -e "$DVM_ROOT/darts/$2" ]]; then
+    echo "ERROR: target version $2 does not exist"
+    return 1
+  fi
+  ln -s -- $2 "$DVM_ROOT/darts/$1"
+}
+
+dvm_alias_delete() {
+  if [[ $# < 1 ]]; then
+    echo "usage: dvm alias delete <alias>"
+    return 1
+  fi
+  if [[ ! -h "$DVM_ROOT/darts/$1" ]]; then
+    echo "ERROR: no such alias $1"
+    return 1
+  fi
+  rm -f "$DVM_ROOT/darts/$1"
+}
+
+dvm_alias() {
+  if [[ $# < 1 ]]; then
+    _dvm_alias_usage
+    return 1
+  fi
+  cmd=$1
+  shift
+  case $cmd in
+    create)
+      dvm_alias_create "$@"
+      ;;
+    delete)
+      dvm_alias_delete "$@"
+      ;;
+    list)
+      dvm_alias_list "$@"
+      ;;
+    *)
+      _dvm_alias_usage
+      return 1
+      ;;
+  esac
+}
+
 dvm_use() {
   if [[ $# < 1 ]]; then
     echo "usage: dvm use <version> [--default]"
@@ -49,20 +117,19 @@ dvm_use() {
     return 1
   fi
 
+  if [[ ! -e "$DVM_ROOT/darts/$version" ]]; then
+    echo "ERROR: version not found. Try 'dvm install $version'"
+    return 1
+  fi
+
   if [[ "$default" == "--default" ]]; then
     local defaults="$DVM_ROOT/environments/default"
     echo 'export DVM_ROOT; DVM_ROOT="$DVM_ROOT"' > "$defaults"
     echo "PATH=\"\$DVM_ROOT/darts/$version/bin:\$PATH\"" >> "$defaults"
-    if [[ -e "$DVM_ROOT/darts/current" ]]; then
-      rm -f "$DVM_ROOT/darts/current"
-    fi
-    ln -s "$DVM_ROOT/darts/$version" "$DVM_ROOT/darts/current"
+    dvm_alias_delete current
+    dvm_alias_create current "$version"
   fi
 
-  if [[ ! -d "$DVM_ROOT/darts/$version" ]]; then
-    echo "ERROR: version not found. Try 'dvm install $version'"
-    return 1
-  fi
   _dvm_path_prepend "$DVM_ROOT/darts/$version/bin"
 }
 
@@ -187,6 +254,9 @@ dvm() {
   cmd=$1
   shift
   case $cmd in
+    alias)
+      dvm_alias "$@"
+      ;;
     use)
       dvm_use "$@"
       ;;

@@ -4,6 +4,7 @@
 # author: Chris Bracken <chris@bracken.jp>
 
 DVM_ROOT="$HOME/.dvm"
+DVM_VERSION=$(cat "$DVM_ROOT/VERSION")
 
 _dvm_usage() {
   echo "usage: dvm <command> [<args>]"
@@ -16,6 +17,7 @@ _dvm_usage() {
   echo "   list       List installed Dart versions"
   echo "   listall    List all available Dart versions"
   echo "   use        Select a Dart version to use"
+  echo "   version    Display the DVM version number"
   return 1
 }
 
@@ -266,6 +268,10 @@ dvm_install() {
   rm -rf -- "$tmpdir"
 }
 
+dvm_version() {
+  echo "Dart Version Manager version $DVM_VERSION installed at $DVM_ROOT"
+}
+
 dvm_implode() {
   echo "This will delete dvm and all installed versions."
   echo -n "Are you sure? "
@@ -313,6 +319,9 @@ dvm() {
       ;;
     use)
       dvm_use "$@"
+      ;;
+    version)
+      dvm_version "$@"
       ;;
     *)
       _dvm_usage

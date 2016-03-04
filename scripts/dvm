@@ -36,13 +36,51 @@ _dvm_path_prepend() {
 }
 
 _dvm_alias_usage() {
-  echo "usage: dvm alias <create|delete|list> [<args>]"
+  echo "usage: dvm alias <create|update|delete|list> [<args>]"
 }
 
 dvm_alias_list() {
   for v in $(find "$DVM_ROOT/darts" -maxdepth 1 ! -path "$DVM_ROOT/darts" -type l); do
     echo $(basename $v)
   done
+}
+
+_dvm_alias_set() {
+  # ensure target exists
+  if [[ "$2" == "--path" ]]; then
+    local abs_path="$3"
+    if [[ "$abs_path" != /* ]]; then
+      abs_path="$PWD/$3"
+    fi
+    if [[ ! -e "$abs_path" ]]; then
+      echo "ERROR: target path $3 does not exist"
+      return 1
+    fi
+    rm -f -- "$DVM_ROOT/darts/$1"
+    ln -s -- "$abs_path" "$DVM_ROOT/darts/$1"
+  else
+    if [[ ! -e "$DVM_ROOT/darts/$2" ]]; then
+      echo "ERROR: target version $2 does not exist"
+      return 1
+    fi
+    rm -f -- "$DVM_ROOT/darts/$1"
+    ln -s -- "$2" "$DVM_ROOT/darts/$1"
+  fi
+}
+
+dvm_alias_update() {
+  if [[ $# < 2 || "$2" == "--path" && $# < 3 ]]; then
+    echo "usage: dvm alias update <alias> [--path] <version>"
+    return 1
+  fi
+
+  # check for existing alias/version
+  if [[ ! -h "$DVM_ROOT/darts/$1" ]]; then
+    echo "ERROR: no such alias $1"
+    return 1
+  fi
+
+  _dvm_alias_set "$@"
 }
 
 dvm_alias_create() {
@@ -59,24 +97,8 @@ dvm_alias_create() {
     echo "ERROR: version $1 already exists"
     return 1
   fi
-  # ensure target exists
-  if [[ "$2" == "--path" ]]; then
-    local abs_path="$3"
-    if [[ "$abs_path" != /* ]]; then
-      abs_path="$PWD/$3"
-    fi
-    if [[ ! -e "$abs_path" ]]; then
-      echo "ERROR: target path $3 does not exist"
-      return 1
-    fi
-    ln -s -- "$abs_path" "$DVM_ROOT/darts/$1"
-  else
-    if [[ ! -e "$DVM_ROOT/darts/$2" ]]; then
-      echo "ERROR: target version $2 does not exist"
-      return 1
-    fi
-    ln -s -- "$2" "$DVM_ROOT/darts/$1"
-  fi
+
+  _dvm_alias_set "$@"
 }
 
 dvm_alias_delete() {
@@ -88,7 +110,7 @@ dvm_alias_delete() {
     echo "ERROR: no such alias $1"
     return 1
   fi
-  rm -f "$DVM_ROOT/darts/$1"
+  rm -f -- "$DVM_ROOT/darts/$1"
 }
 
 dvm_alias() {
@@ -107,6 +129,9 @@ dvm_alias() {
       ;;
     list)
       dvm_alias_list "$@"
+      ;;
+    update)
+      dvm_alias_update "$@"
       ;;
     *)
       _dvm_alias_usage
@@ -207,7 +232,7 @@ dvm_install() {
 
   # Move SDK under $DVM_ROOT/darts.
   if [[ -d "$DVM_ROOT/darts/$version" ]]; then
-    rm -rf "$DVM_ROOT/darts/$version"
+    rm -rf -- "$DVM_ROOT/darts/$version"
   fi
   mv dart-sdk "$DVM_ROOT/darts/$version"
 

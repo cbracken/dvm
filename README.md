@@ -21,7 +21,7 @@ fi
 
 Commands:
 
-   * `alias`: manage dart version aliases
+   * `alias`: manage Dart version aliases
    * `help`: display usage
    * `implode`: delete DVM and all installed Dart versions
    * `install`: install a Dart version

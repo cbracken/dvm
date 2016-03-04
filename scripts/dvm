@@ -41,9 +41,7 @@ _dvm_alias_usage() {
 }
 
 dvm_alias_list() {
-  for v in $(find "$DVM_ROOT/darts" -maxdepth 1 ! -path "$DVM_ROOT/darts" -type l); do
-    echo $(basename $v)
-  done
+  find "$DVM_ROOT/darts" -maxdepth 1 ! -path "$DVM_ROOT/darts" -type l -exec basename "{}" \; | sort
 }
 
 _dvm_alias_set() {

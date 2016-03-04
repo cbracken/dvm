@@ -304,8 +304,8 @@ dvm() {
     implode)
       dvm_implode "$@"
       ;;
-    use)
-      dvm_use "$@"
+    install)
+      dvm_install "$@"
       ;;
     list)
       dvm_list "$@"
@@ -313,8 +313,8 @@ dvm() {
     listall)
       dvm_listall "$@"
       ;;
-    install)
-      dvm_install "$@"
+    use)
+      dvm_use "$@"
       ;;
     *)
       _dvm_usage

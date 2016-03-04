@@ -15,7 +15,7 @@ _dvm_usage() {
   echo "   implode    Delete DVM and all installed Dart versions"
   echo "   install    Install a Dart version"
   echo "   list       List installed Dart versions"
-  echo "   listall    List all available Dart versions"
+  echo "   listall    List all available Dart versions (--dev for dev channel)"
   echo "   use        Select a Dart version to use"
   echo "   version    Display the DVM version number"
   return 1
@@ -171,12 +171,23 @@ dvm_list() {
       -exec basename "{}" \; | sort
 }
 
-dvm_listall() {
+_dvm_list_repo() {
+  local channel=$1
   local api_uri="https://www.googleapis.com/storage/v1/b/dart-archive/o"
-  local query="prefix=channels/stable/release/&delimiter=/"
+  local query="prefix=channels/$channel/release/&delimiter=/"
   curl -s "$api_uri?$query" | \
-      grep "channels/stable/release/" | \
-      sed -e "s@.*/stable/release/@@;s@/.*@@"
+      grep "channels/$channel/release/" | \
+      sed -e "s@.*/$channel/release/@@;s@/.*@@" | \
+      grep -v "^[0-9]*$"
+}
+
+
+dvm_listall() {
+  if [[ "$1" == "--dev" ]]; then
+    _dvm_list_repo "dev"
+  else
+    _dvm_list_repo "stable"
+  fi
 }
 
 dvm_install() {

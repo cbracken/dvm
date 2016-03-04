@@ -26,7 +26,7 @@ Commands:
    * `implode`: delete DVM and all installed Dart versions
    * `install`: install a Dart version
    * `list`: list installed Dart versions
-   * `listall`: list all available Dart versions
+   * `listall`: list all available Dart versions (`--dev` for dev channel)
    * `use`: select a Dart version to use
    * `version`: Display the DVM version number
 

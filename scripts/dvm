@@ -224,7 +224,7 @@ dvm_install() {
   if [[ $? -ne 0 ]]; then
     echo "ERROR: unable to download Dart SDK. Are you sure that version exists?"
     popd > /dev/null
-    rm -rf $tmpdir
+    rm -rf -- "$tmpdir"
     return 1
   fi
   unzip $sdk_archive
@@ -264,7 +264,7 @@ dvm_install() {
 
   # Clean up.
   popd > /dev/null
-  rm -rf $tmpdir
+  rm -rf -- "$tmpdir"
 }
 
 dvm() {

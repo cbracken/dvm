@@ -166,9 +166,8 @@ dvm_use() {
 }
 
 dvm_list() {
-  for v in $(find "$DVM_ROOT/darts" -maxdepth 1 ! -path "$DVM_ROOT/darts" -type d); do
-    echo $(basename $v)
-  done
+  find "$DVM_ROOT/darts" -maxdepth 1 ! -path "$DVM_ROOT/darts" -type d \
+      -exec basename "{}" \; | sort -V
 }
 
 dvm_listall() {

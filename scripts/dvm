@@ -167,7 +167,7 @@ dvm_use() {
 
 dvm_list() {
   find "$DVM_ROOT/darts" -maxdepth 1 ! -path "$DVM_ROOT/darts" -type d \
-      -exec basename "{}" \; | sort -V
+      -exec basename "{}" \; | sort
 }
 
 dvm_listall() {

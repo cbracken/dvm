@@ -190,6 +190,26 @@ dvm_listall() {
   fi
 }
 
+_dvm_download_sdk() {
+  local channel=$1
+  local version=$2
+  local sdk_archive=$3
+
+  local dl_uri="https://storage.googleapis.com/dart-archive/channels/$channel/release"
+  local base_uri="$dl_uri/$version"
+  curl -f -O "$base_uri/sdk/$sdk_archive"
+}
+
+_dvm_download_dartium() {
+  local channel=$1
+  local version=$2
+  local dartium_archive=$3
+
+  local dl_uri="https://storage.googleapis.com/dart-archive/channels/$channel/release"
+  local base_uri="$dl_uri/$version"
+  curl -f -O "$base_uri/dartium/$dartium_archive"
+}
+
 dvm_install() {
   if [[ $# < 1 ]]; then
     echo "usage: dvm install <version>"
@@ -230,9 +250,9 @@ dvm_install() {
   pushd $tmpdir > /dev/null
 
   # Download SDK.
-  local dl_uri="https://storage.googleapis.com/dart-archive/channels/stable/release"
-  local base_uri="$dl_uri/$version"
-  curl -f -O "$base_uri/sdk/$sdk_archive"
+  for channel in "stable" "dev"; do
+    _dvm_download_sdk "$channel" "$version" "$sdk_archive" && break
+  done
   if [[ $? -ne 0 ]]; then
     echo "ERROR: unable to download Dart SDK. Are you sure that version exists?"
     popd > /dev/null
@@ -249,7 +269,9 @@ dvm_install() {
   mv dart-sdk "$DVM_ROOT/darts/$version"
 
   # Download Dartium.
-  curl -f -O "$base_uri/dartium/$dartium_archive"
+  for channel in "stable" "dev"; do
+    _dvm_download_dartium "$channel" "$version" "$dartium_archive" && break
+  done
   if [[ $? -ne 0 ]]; then
     echo "ERROR: unable to download Dartium. But hey, at least you got the SDK."
   else

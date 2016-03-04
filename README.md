@@ -21,6 +21,7 @@ fi
 
 Commands:
 
+   * `alias`: manage dart version aliases
    * `list`: list installed Dart versions
    * `listall`: list all available Dart versions
    * `use`: select a Dart version to use

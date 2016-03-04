@@ -22,6 +22,7 @@ fi
 Commands:
 
    * `alias`: manage dart version aliases
+   * `implode`: delete DVM and all installed Dart versions
    * `list`: list installed Dart versions
    * `listall`: list all available Dart versions
    * `use`: select a Dart version to use
@@ -32,7 +33,7 @@ Commands:
 To remove dvm and all installed Dart versions:
 
 ```
-rm -rf ~/.dvm
+dvm implode
 ```
 
 ## Credits

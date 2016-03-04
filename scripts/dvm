@@ -10,6 +10,7 @@ _dvm_usage() {
   echo ""
   echo "Commands:"
   echo "   alias      Manage Dart version aliases"
+  echo "   implode    Delete DVM and all installed Dart versions"
   echo "   install    Install a Dart version"
   echo "   list       List installed Dart versions"
   echo "   listall    List all available Dart versions"
@@ -267,6 +268,18 @@ dvm_install() {
   rm -rf -- "$tmpdir"
 }
 
+dvm_implode() {
+  echo "This will delete dvm and all installed versions."
+  echo -n "Are you sure? "
+  read yn
+  yn=$(tr '[:upper:]' '[:lower:]' <<< "$yn")
+  if [[ "$yn" == "y" || "$yn" == "yes" ]]; then
+    rm -rf -- "$DVM_ROOT" && echo "DVM successfully removed" || echo "Failed to remove DVM"
+  else
+    echo "Cancelled"
+  fi
+}
+
 dvm() {
   if [[ -z "$DVM_ROOT" ]]; then
     echo "ERROR: DVM_ROOT not set. Please source \$DVM_ROOT/scripts/dvm."
@@ -287,6 +300,9 @@ dvm() {
   case $cmd in
     alias)
       dvm_alias "$@"
+      ;;
+    implode)
+      dvm_implode "$@"
       ;;
     use)
       dvm_use "$@"

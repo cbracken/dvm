@@ -125,11 +125,6 @@ dvm_use() {
   local default=$2
   shift
 
-  if [[ "$version" == "current" ]]; then
-    echo "ERROR: http://goo.gl/Mzdy5s"
-    return 1
-  fi
-
   if [[ ! -e "$DVM_ROOT/darts/$version" ]]; then
     echo "ERROR: version not found. Try 'dvm install $version'"
     return 1
@@ -139,8 +134,6 @@ dvm_use() {
     local defaults="$DVM_ROOT/environments/default"
     echo 'export DVM_ROOT; DVM_ROOT="$DVM_ROOT"' > "$defaults"
     echo "PATH=\"\$DVM_ROOT/darts/$version/bin:\$PATH\"" >> "$defaults"
-    dvm_alias_delete current
-    dvm_alias_create current "$version"
   fi
 
   _dvm_path_prepend "$DVM_ROOT/darts/$version/bin"

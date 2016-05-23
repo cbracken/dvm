@@ -27,7 +27,7 @@ Commands:
    * `install`: install a Dart version
    * `list`: list installed Dart versions
    * `listall`: list all available Dart versions (`--dev` for dev channel)
-   * `use`: select a Dart version to use
+   * `use`: select a Dart version to use (`--default` to set as default)
    * `version`: Display the DVM version number
 
 ## Uninstalling

@@ -160,9 +160,11 @@ dvm_use() {
   if [[ "$default" == "--default" ]]; then
     local defaults="$DVM_ROOT/environments/default"
     echo 'export DVM_ROOT; DVM_ROOT="$DVM_ROOT"' > "$defaults"
+    echo "export DART_SDK; DART_SDK=\"$DVM_ROOT/darts/$version\"" >> "$defaults"
     echo "PATH=\"\$DVM_ROOT/darts/$version/bin:\$PATH\"" >> "$defaults"
   fi
 
+  export DART_SDK="$DVM_ROOT/darts/$version"
   _dvm_path_prepend "$DVM_ROOT/darts/$version/bin"
 }
 

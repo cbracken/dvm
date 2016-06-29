@@ -332,7 +332,7 @@ dvm_install() {
     case $(uname) in
       Darwin)
         echo "#!/bin/bash" > dartium
-        echo "open $DVM_ROOT/darts/$version/dartium/Chromium.app" >> dartium
+        echo "open \"$DVM_ROOT/darts/$version/dartium/Chromium.app\"" >> dartium
         chmod ugo+x dartium
         ;;
       Linux)

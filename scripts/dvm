@@ -249,12 +249,12 @@ dvm_install() {
   case $(uname) in
     Darwin)
       local sdk_archive=dartsdk-macos-x64-release.zip
-      local content_shell_archive=content_shell-macos-ia32-release.zip
-      local dartium_archive=dartium-macos-ia32-release.zip
+      local content_shell_archive=content_shell-macos-x64-release.zip
+      local dartium_archive=dartium-macos-x64-release.zip
       ;;
     Linux)
       local sdk_archive=dartsdk-linux-x64-release.zip
-      local content_shell_archive=content_shell-linux-ia32-release.zip
+      local content_shell_archive=content_shell-linux-x64-release.zip
       local dartium_archive=dartium-linux-x64-release.zip
       ;;
     *)

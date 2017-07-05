@@ -226,6 +226,18 @@ _dvm_download_dartium() {
   curl -f -O "$base_uri/dartium/$dartium_archive"
 }
 
+# Returns the CPU architechture for Dartium in the specified SDK version.
+_dvm_dartium_arch() {
+  # SDKs <= 1.19.x are ia32, > 1.20.0 are x64.
+  # Through a happy quirk of fate, 1.20.0 never existed.
+  local archBoundary="1.20.0"
+  if [[ "$1" == "latest" || "$(printf "$1\n$archBoundary\n" | sort -t. -n -k 1,1 -k 2,2 -k 3,3 | head -n1)" == "$archBoundary" ]]; then
+    echo "x64"
+  else
+    echo "ia32"
+  fi
+}
+
 dvm_install() {
   if [[ $# < 1 ]]; then
     echo "usage: dvm install <version>"
@@ -248,9 +260,10 @@ dvm_install() {
 
   case $(uname) in
     Darwin)
-      local sdk_archive=dartsdk-macos-x64-release.zip
-      local content_shell_archive=content_shell-macos-x64-release.zip
-      local dartium_archive=dartium-macos-x64-release.zip
+      local arch="$(_dvm_dartium_arch "$version")"
+      local sdk_archive="dartsdk-macos-x64-release.zip"
+      local content_shell_archive="content_shell-macos-$arch-release.zip"
+      local dartium_archive="dartium-macos-$arch-release.zip"
       ;;
     Linux)
       local sdk_archive=dartsdk-linux-x64-release.zip

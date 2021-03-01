@@ -187,11 +187,12 @@ _dvm_list_repo() {
 dvm_listall() {
   if [[ "$1" == "--dev" ]]; then
     _dvm_list_repo "dev"
+  elif [[ "$1" == "--beta" ]]; then
+    _dvm_list_repo "beta"
   else
     _dvm_list_repo "stable"
   fi
 }
-
 _dvm_download_sdk() {
   local channel=$1
   local version=$2
@@ -251,7 +252,7 @@ dvm_install() {
   fi
 
   local version=$1
-  shift 
+  shift
 
   if [[ -d "$DVM_ROOT/darts/$version" ]]; then
     echo "ERROR: version $version is already installed"
@@ -275,13 +276,13 @@ dvm_install() {
       return 1
       ;;
   esac
-  
+
   # Create tmp workspace.
   tmpdir=$(mktemp -d)
   pushd $tmpdir > /dev/null
 
   # Download SDK.
-  for channel in "stable" "dev"; do
+  for channel in "stable" "beta" "dev"; do
     _dvm_download_sdk "$channel" "$version" "$sdk_archive" && break
   done
   if [[ $? -ne 0 ]]; then
@@ -300,7 +301,7 @@ dvm_install() {
   mv dart-sdk "$DVM_ROOT/darts/$version"
 
   # Download Content Shell
-  for channel in "stable" "dev"; do
+  for channel in "stable" "beta" "dev"; do
     _dvm_download_content_shell "$channel" "$version" "$content_shell_archive" && break
   done
   if [[ $? -ne 0 ]]; then
@@ -328,7 +329,7 @@ dvm_install() {
   fi
 
   # Download Dartium.
-  for channel in "stable" "dev"; do
+  for channel in "stable" "beta" "dev"; do
     _dvm_download_dartium "$channel" "$version" "$dartium_archive" && break
   done
   if [[ $? -ne 0 ]]; then

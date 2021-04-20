@@ -39,6 +39,20 @@ _dvm_path_prepend() {
   fi
 }
 
+_dvm_doctor() {
+  # Check for unzip tool.
+  unzip_path="$(which unzip)"
+  if [[ ! -x "$unzip_path" ]]; then
+    echo "ERROR: dvm requires the 'unzip' tool, which was not found."
+    echo "To install unzip:"
+    echo "  Debian/Ubuntu: sudo apt install unzip"
+    echo "  RedHat/Fedora: sudo dnf install unzip"
+    echo "  OpenSUSE:      sudo zypper install unzip"
+    echo "  Arch/Manjaro:  sudo pacman -S unzip"
+    return 1
+  fi
+}
+
 _dvm_alias_usage() {
   echo "usage: dvm alias <create|update|delete|list> [<args>]"
 }
@@ -386,6 +400,14 @@ dvm() {
     echo "ERROR: DVM_ROOT does not exist. Please reinstall DVM."
     return 1
   fi
+
+  # Verify prerequisites are installed.
+  _dvm_doctor
+  if [[ $? -ne 0 ]]; then
+    return 1
+  fi
+
+  # Create required directories.
   _dvm_create_dirs
 
   if [[ $# < 1 ]]; then

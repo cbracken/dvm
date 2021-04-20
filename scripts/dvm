@@ -227,7 +227,6 @@ _dvm_download_content_shell() {
   local base_uri="$dl_uri/$version"
   echo "Downloading: $base_uri/dartium/$content_shell_archive"
   curl -f -O "$base_uri/dartium/$content_shell_archive"
-
 }
 
 _dvm_download_dartium() {
@@ -314,60 +313,63 @@ dvm_install() {
   fi
   mv dart-sdk "$DVM_ROOT/darts/$version"
 
-  # Download Content Shell
-  for channel in "stable" "beta" "dev"; do
-    _dvm_download_content_shell "$channel" "$version" "$content_shell_archive" && break
-  done
-  if [[ $? -ne 0 ]]; then
-    echo "ERROR: unable to download Content Shell. But hey, at least you got the SDK."
-  else
-    unzip $content_shell_archive
-    if [[ ! -d "$DVM_ROOT/darts/$version/content_shell" ]]; then
-      local content_shell_dir="$(find . -maxdepth 1 ! -path . -type d)"
-      mv "$content_shell_dir" "$DVM_ROOT/darts/$version/content_shell"
+  # Content shell/Dartium are not included with Dart 2.0 onwards.
+  if [[ "$version" = "1."* ]]; then
+    # Download Content Shell
+    for channel in "stable" "beta" "dev"; do
+      _dvm_download_content_shell "$channel" "$version" "$content_shell_archive" && break
+    done
+    if [[ $? -ne 0 ]]; then
+      echo "ERROR: unable to download Content Shell. But hey, at least you got the SDK."
+    else
+      unzip $content_shell_archive
+      if [[ ! -d "$DVM_ROOT/darts/$version/content_shell" ]]; then
+        local content_shell_dir="$(find . -maxdepth 1 ! -path . -type d)"
+        mv "$content_shell_dir" "$DVM_ROOT/darts/$version/content_shell"
+      fi
+
+      # Create Content Shell symlink.
+      pushd "$DVM_ROOT/darts/$version/bin" > /dev/null
+      case $(uname) in
+        Darwin)
+          echo "#!/bin/bash" > content_shell
+          echo "exec \"$DVM_ROOT/darts/$version/content_shell/Content Shell.app/Contents/MacOS/Content Shell\" \"\$@\"" >> content_shell
+          chmod ugo+x content_shell
+          ;;
+        Linux)
+          ln -s ../content_shell/content_shell content_shell
+          ;;
+      esac
+      popd > /dev/null
     fi
 
-    # Create Content Shell symlink.
-    pushd "$DVM_ROOT/darts/$version/bin" > /dev/null
-    case $(uname) in
-      Darwin)
-        echo "#!/bin/bash" > content_shell
-        echo "exec \"$DVM_ROOT/darts/$version/content_shell/Content Shell.app/Contents/MacOS/Content Shell\" \"\$@\"" >> content_shell
-        chmod ugo+x content_shell
-        ;;
-      Linux)
-        ln -s ../content_shell/content_shell content_shell
-        ;;
-    esac
-    popd > /dev/null
-  fi
+    # Download Dartium.
+    for channel in "stable" "beta" "dev"; do
+      _dvm_download_dartium "$channel" "$version" "$dartium_archive" && break
+    done
+    if [[ $? -ne 0 ]]; then
+      echo "ERROR: unable to download Dartium. But hey, at least you got the SDK."
+    else
+      unzip $dartium_archive
+      if [[ ! -d "$DVM_ROOT/darts/$version/dartium" ]]; then
+        local dartium_dir="$(find . -maxdepth 1 ! -path . -type d)"
+        mv "$dartium_dir" "$DVM_ROOT/darts/$version/dartium"
+      fi
 
-  # Download Dartium.
-  for channel in "stable" "beta" "dev"; do
-    _dvm_download_dartium "$channel" "$version" "$dartium_archive" && break
-  done
-  if [[ $? -ne 0 ]]; then
-    echo "ERROR: unable to download Dartium. But hey, at least you got the SDK."
-  else
-    unzip $dartium_archive
-    if [[ ! -d "$DVM_ROOT/darts/$version/dartium" ]]; then
-      local dartium_dir="$(find . -maxdepth 1 ! -path . -type d)"
-      mv "$dartium_dir" "$DVM_ROOT/darts/$version/dartium"
+      # Create Dartium symlink.
+      pushd "$DVM_ROOT/darts/$version/bin" > /dev/null
+      case $(uname) in
+        Darwin)
+          echo "#!/bin/bash" > dartium
+          echo "open \"$DVM_ROOT/darts/$version/dartium/Chromium.app\"" >> dartium
+          chmod ugo+x dartium
+          ;;
+        Linux)
+          ln -s ../dartium/chrome dartium
+          ;;
+      esac
+      popd > /dev/null
     fi
-
-    # Create Dartium symlink.
-    pushd "$DVM_ROOT/darts/$version/bin" > /dev/null
-    case $(uname) in
-      Darwin)
-        echo "#!/bin/bash" > dartium
-        echo "open \"$DVM_ROOT/darts/$version/dartium/Chromium.app\"" >> dartium
-        chmod ugo+x dartium
-        ;;
-      Linux)
-        ln -s ../dartium/chrome dartium
-        ;;
-    esac
-    popd > /dev/null
   fi
 
   # Clean up.

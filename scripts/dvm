@@ -16,6 +16,7 @@ _dvm_usage() {
   echo "   install    Install a Dart version"
   echo "   list       List installed Dart versions"
   echo "   listall    List all available Dart versions (--dev for dev channel)"
+  echo "   upgrade    Upgrade dvm to the latest version"
   echo "   use        Select a Dart version to use (--default to set as default)"
   echo "   version    Display the dvm version number"
   return 1
@@ -378,6 +379,51 @@ dvm_install() {
   rm -rf -- "$tmpdir"
 }
 
+# Returns 1 if there are differences against the latest upstream version;
+# otherwise returns 0.
+_dvm_needsupgrade() {
+  git -C "$DVM_ROOT" fetch
+  if [[ $? -ne 0 ]]; then
+    # Failed to fetch; don't try to update.
+    echo "ERROR: failed to fetch dvm."
+    return 0
+  fi
+
+  git -C "$DVM_ROOT" diff origin
+  if [[ $? -ne 0 ]]; then
+    # No diffs vs upstream.
+    return 0
+  fi
+  return 1
+}
+
+dvm_upgrade() {
+  # Abort if there are local diffs that aren't checked in.
+  local diffs="$(git -C "$DVM_ROOT" status --porcelain=v1 2>/dev/null)"
+  if [[ -n "$diffs" ]]; then
+    echo "ERROR: aborting update. Local changes found: $DVM_ROOT"
+    echo "Please stash or commit your changes prior to updating."
+    return 1
+  fi
+
+  if [[ ! _dvm_needsupgrade ]]; then
+    echo "dvm is up to date."
+    return 0
+  fi
+
+  git -C "$DVM_ROOT" pull --rebase origin > /dev/null
+  if [[ $? -ne 0 ]]; then
+    git -C "$DVM_ROOT" rebase --abort > /dev/null
+    echo "ERROR: failed to upgrade dvm."
+    return 1
+  fi
+
+  # Re-source the script to replace function definitions.
+  source "$DVM_ROOT/scripts/dvm"
+  echo "dvm was updated to the latest version."
+  return 0
+}
+
 dvm_version() {
   echo "Dart Version Manager version $DVM_VERSION installed at $DVM_ROOT"
 }
@@ -434,6 +480,9 @@ dvm() {
       ;;
     listall)
       dvm_listall "$@"
+      ;;
+    upgrade)
+      dvm_upgrade "$@"
       ;;
     use)
       dvm_use "$@"

@@ -389,12 +389,12 @@ _dvm_needsupgrade() {
     return 0
   fi
 
-  git -C "$DVM_ROOT" diff origin
+  git -C "$DVM_ROOT" diff --exit-code origin/master
   if [[ $? -ne 0 ]]; then
-    # No diffs vs upstream.
-    return 0
+    # Has diffs vs upstream.
+    return 1
   fi
-  return 1
+  return 0
 }
 
 dvm_upgrade() {

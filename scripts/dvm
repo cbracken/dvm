@@ -69,14 +69,14 @@ _dvm_alias_set() {
       abs_path="$PWD/$3"
     fi
     if [[ ! -e "$abs_path" ]]; then
-      echo "ERROR: target path $3 does not exist"
+      echo "ERROR: target path $3 does not exist."
       return 1
     fi
     rm -f -- "$DVM_ROOT/darts/$1"
     ln -s -- "$abs_path" "$DVM_ROOT/darts/$1"
   else
     if [[ ! -e "$DVM_ROOT/darts/$2" ]]; then
-      echo "ERROR: target version $2 does not exist"
+      echo "ERROR: target version $2 does not exist."
       return 1
     fi
     rm -f -- "$DVM_ROOT/darts/$1"
@@ -92,7 +92,7 @@ dvm_alias_update() {
 
   # check for existing alias/version
   if [[ ! -h "$DVM_ROOT/darts/$1" ]]; then
-    echo "ERROR: no such alias $1"
+    echo "ERROR: no such alias $1."
     return 1
   fi
 
@@ -107,10 +107,10 @@ dvm_alias_create() {
 
   # check for existing alias/version
   if [[ -h "$DVM_ROOT/darts/$1" ]]; then
-    echo "ERROR: alias $1 already exists"
+    echo "ERROR: alias $1 already exists."
     return 1
   elif [[ -d "$DVM_ROOT/darts/$1" ]]; then
-    echo "ERROR: version $1 already exists"
+    echo "ERROR: version $1 already exists."
     return 1
   fi
 
@@ -123,7 +123,7 @@ dvm_alias_delete() {
     return 1
   fi
   if [[ ! -h "$DVM_ROOT/darts/$1" ]]; then
-    echo "ERROR: no such alias $1"
+    echo "ERROR: no such alias $1."
     return 1
   fi
   rm -f -- "$DVM_ROOT/darts/$1"
@@ -167,7 +167,7 @@ dvm_use() {
   shift
 
   if [[ ! -e "$DVM_ROOT/darts/$version" ]]; then
-    echo "ERROR: version not found. Try 'dvm install $version'"
+    echo "ERROR: version not found. Try 'dvm install $version'."
     return 1
   fi
 
@@ -269,7 +269,7 @@ dvm_install() {
   shift
 
   if [[ -d "$DVM_ROOT/darts/$version" ]]; then
-    echo "ERROR: version $version is already installed"
+    echo "ERROR: version $version is already installed."
     return 1
   fi
 
@@ -388,9 +388,9 @@ dvm_implode() {
   read yn
   yn=$(tr '[:upper:]' '[:lower:]' <<< "$yn")
   if [[ "$yn" == "y" || "$yn" == "yes" ]]; then
-    rm -rf -- "$DVM_ROOT" && echo "DVM successfully removed" || echo "Failed to remove DVM"
+    rm -rf -- "$DVM_ROOT" && echo "DVM successfully removed." || echo "Failed to remove DVM."
   else
-    echo "Cancelled"
+    echo "Cancelled."
   fi
 }
 

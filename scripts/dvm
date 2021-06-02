@@ -12,12 +12,12 @@ _dvm_usage() {
   echo "Commands:"
   echo "   alias      Manage Dart version aliases"
   echo "   help       Display usage"
-  echo "   implode    Delete DVM and all installed Dart versions"
+  echo "   implode    Delete dvm and all installed Dart versions"
   echo "   install    Install a Dart version"
   echo "   list       List installed Dart versions"
   echo "   listall    List all available Dart versions (--dev for dev channel)"
   echo "   use        Select a Dart version to use (--default to set as default)"
-  echo "   version    Display the DVM version number"
+  echo "   version    Display the dvm version number"
   return 1
 }
 
@@ -400,7 +400,7 @@ dvm() {
     return 1
   fi
   if [[ ! -d "$DVM_ROOT" ]]; then
-    echo "ERROR: DVM_ROOT does not exist. Please reinstall DVM."
+    echo "ERROR: DVM_ROOT does not exist. Please reinstall dvm."
     return 1
   fi
 

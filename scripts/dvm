@@ -184,7 +184,7 @@ dvm_use() {
 
 dvm_list() {
   find "$DVM_ROOT/darts" -maxdepth 1 ! -path "$DVM_ROOT/darts" -type d \
-      -exec basename "{}" \; | sort
+      -exec basename "{}" \; | sort -V
 }
 
 _dvm_list_repo() {
@@ -194,7 +194,8 @@ _dvm_list_repo() {
   curl -s "$api_uri?$query" | \
       grep "channels/$channel/release/" | \
       sed -e "s@.*/$channel/release/@@;s@/.*@@" | \
-      grep -v "^[0-9]*$"
+      grep -v "^[0-9]*$" | \
+      sort -V
 }
 
 

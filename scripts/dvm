@@ -382,7 +382,7 @@ dvm_install() {
 # Returns 1 if there are differences against the latest upstream version;
 # otherwise returns 0.
 _dvm_needsupgrade() {
-  git -C "$DVM_ROOT" fetch
+  git -C "$DVM_ROOT" fetch origin
   if [[ $? -ne 0 ]]; then
     # Failed to fetch; don't try to update.
     echo "ERROR: failed to fetch dvm."
@@ -411,7 +411,7 @@ dvm_upgrade() {
     return 0
   fi
 
-  git -C "$DVM_ROOT" pull --rebase origin > /dev/null
+  git -C "$DVM_ROOT" pull --rebase origin master > /dev/null
   if [[ $? -ne 0 ]]; then
     git -C "$DVM_ROOT" rebase --abort > /dev/null
     echo "ERROR: failed to upgrade dvm."

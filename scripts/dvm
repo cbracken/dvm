@@ -198,7 +198,6 @@ _dvm_list_repo() {
       sort -V
 }
 
-
 dvm_listall() {
   if [[ "$1" == "--dev" ]]; then
     _dvm_list_repo "dev"
@@ -208,6 +207,7 @@ dvm_listall() {
     _dvm_list_repo "stable"
   fi
 }
+
 _dvm_download_sdk() {
   local channel=$1
   local version=$2

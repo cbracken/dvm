@@ -420,7 +420,7 @@ dvm_upgrade() {
 
   # Re-source the script to replace function definitions.
   source "$DVM_ROOT/scripts/dvm"
-  echo "dvm was updated to the latest version."
+  echo "dvm was upgraded to the latest version."
   return 0
 }
 

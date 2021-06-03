@@ -389,8 +389,9 @@ _dvm_needsupgrade() {
     return 0
   fi
 
-  git -C "$DVM_ROOT" diff --exit-code origin/master > /dev/null
-  if [[ $? -eq 0 ]]; then
+  local local_sha="$(git -C "$DVM_ROOT" rev-parse HEAD)"
+  local remote_sha="$(git -C "$DVM_ROOT" rev-parse origin/master)"
+  if [[ "$local_sha" == "$remote_sha" ]]; then
     # No diffs vs upstream.
     return 0
   fi

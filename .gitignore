@@ -2,4 +2,6 @@
 *~
 
 # DVM
-darts
+darts/
+cache/
+environments/

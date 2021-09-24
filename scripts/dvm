@@ -493,7 +493,11 @@ dvm() {
       dvm_version "$@"
       ;;
     *)
-      _dvm_usage
+      if [[ $(type -t dvm_$cmd) == "function" ]]; then
+        dvm_$cmd "$@"
+      else
+        _dvm_usage
+      fi
       ;;
   esac
 }

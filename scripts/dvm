@@ -274,14 +274,24 @@ dvm_install() {
     return 1
   fi
 
-  case $(uname) in
-    Darwin)
+  case $(uname -a) in
+    Darwin*)
       local arch="$(_dvm_dartium_arch "$version")"
       local sdk_archive="dartsdk-macos-x64-release.zip"
       local content_shell_archive="content_shell-macos-$arch-release.zip"
       local dartium_archive="dartium-macos-$arch-release.zip"
       ;;
-    Linux)
+    Linux*armv7*)
+      local sdk_archive=dartsdk-linux-arm-release.zip
+      local content_shell_archive=content_shell-linux-arm-release.zip
+      local dartium_archive=dartium-linux-arm-release.zip
+      ;;
+    Linux*armv8*)
+      local sdk_archive=dartsdk-linux-arm64-release.zip
+      local content_shell_archive=content_shell-linux-arm64-release.zip
+      local dartium_archive=dartium-linux-arm64-release.zip
+      ;;
+    Linux*)
       local sdk_archive=dartsdk-linux-x64-release.zip
       local content_shell_archive=content_shell-linux-x64-release.zip
       local dartium_archive=dartium-linux-x64-release.zip

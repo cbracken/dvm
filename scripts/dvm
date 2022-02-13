@@ -3,7 +3,7 @@
 # Dart Version Manager
 # author: Chris Bracken <chris@bracken.jp>
 
-DVM_ROOT="$HOME/.dvm"
+DVM_ROOT="${DVM_ROOT:-$HOME/.dvm}"
 DVM_VERSION=$(cat "$DVM_ROOT/VERSION")
 
 _dvm_usage() {

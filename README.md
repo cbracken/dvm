@@ -17,6 +17,9 @@ if [[ -f ~/.dvm/scripts/dvm ]]; then
 fi
 ```
 
+Optionally, installation in a custom location is supported by setting and
+exporting `DVM_ROOT` in your environment prior to the above invocation.
+
 ## Usage
 
 Commands:

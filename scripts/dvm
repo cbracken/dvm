@@ -243,8 +243,11 @@ _dvm_download_dartium() {
 }
 
 # Returns the CPU architechture for Dart in the specified SDK version.
-_macos_m1_dart_arch() {
-  # SDKs >= 2.14.1 are compiled for arm64.
+#
+# Used by Apple Silicon (arm64) based Macs to determine the architecture of the
+# Dart SDK archive to download. For SDK 2.14.1 and later, download the arm64
+# bundle. Prior to that, only Intel binaries are available.
+_macos_arm64_sdk_arch() {
   local archBoundary="2.14.1"
   if [[ "$1" == "latest" || "$(printf "$1\n$archBoundary\n" | sort -t. -n -k 1,1 -k 2,2 -k 3,3 | head -n1)" == "$archBoundary" ]]; then
     echo "arm64"
@@ -254,9 +257,11 @@ _macos_m1_dart_arch() {
 }
 
 # Returns the CPU architechture for Dartium in the specified SDK version.
+#
+# In Dart SDKx 1.19.x and earlier, Dartium shipped only as an ia32 build. In
+# SDKs later than 1.20.0, it was produced as an x64 build. Through a happy
+# quirk of fate, 1.20.0 never existed.
 _macos_dartium_arch() {
-  # SDKs <= 1.19.x are ia32, > 1.20.0 are x64.
-  # Through a happy quirk of fate, 1.20.0 never existed.
   local archBoundary="1.20.0"
   if [[ "$1" == "latest" || "$(printf "$1\n$archBoundary\n" | sort -t. -n -k 1,1 -k 2,2 -k 3,3 | head -n1)" == "$archBoundary" ]]; then
     echo "x64"
@@ -287,7 +292,7 @@ dvm_install() {
 
   case $(uname -a) in
     Darwin*arm64*)
-      local arch="$(_macos_m1_dart_arch "$version")"
+      local arch="$(_macos_arm64_sdk_arch "$version")"
       local sdk_archive="dartsdk-macos-$arch-release.zip"
       # M1 users probably won't be using dartium or the content shell
       ;;

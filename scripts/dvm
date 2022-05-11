@@ -294,7 +294,9 @@ dvm_install() {
     Darwin*arm64*)
       local arch="$(_macos_arm64_sdk_arch "$version")"
       local sdk_archive="dartsdk-macos-$arch-release.zip"
-      # M1 users probably won't be using dartium or the content shell
+      arch="$(_macos_dartium_arch "$version")"
+      local content_shell_archive="content_shell-macos-$arch-release.zip"
+      local dartium_archive="dartium-macos-$arch-release.zip"
       ;;
     Darwin*)
       local arch="$(_macos_dartium_arch "$version")"

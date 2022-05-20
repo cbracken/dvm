@@ -25,6 +25,7 @@ _dvm_usage() {
 _dvm_create_dirs() {
   mkdir -p "$DVM_ROOT/darts" > /dev/null 2>&1
   mkdir -p "$DVM_ROOT/environments" > /dev/null 2>&1
+  mkdir -p "$DVM_ROOT/cache" > /dev/null 2>&1
 }
 
 # Removes $1 from PATH.
@@ -50,6 +51,22 @@ _dvm_doctor() {
     echo "  RedHat/Fedora: sudo dnf install unzip"
     echo "  OpenSUSE:      sudo zypper install unzip"
     echo "  Arch/Manjaro:  sudo pacman -S unzip"
+    echo "  Mac OS:        brew install unzip"
+    return 1
+  fi
+}
+
+_dvm_check_fzf() {
+  if [[ ! -x "$(which fzf)" ]]; then
+    echo "ERROR: dvm requires the 'fzf' tool, which was not found."
+    echo "To install fzf:"
+    echo "  Debian/Ubuntu: sudo apt install fzf"
+    echo "  RedHat/Fedora: sudo dnf install fzf"
+    echo "  OpenSUSE:      sudo zypper install fzf"
+    echo "  Arch/Manjaro:  sudo pacman -S fzf"
+    echo "  Mac OS:        brew install fzf"
+    echo ""
+    echo "See: https://github.com/junegunn/fzf#installation"
     return 1
   fi
 }
@@ -58,7 +75,7 @@ _dvm_alias_usage() {
   echo "usage: dvm alias <create|update|delete|list> [<args>]"
 }
 
-dvm_alias_list() {
+_dvm_alias_list() {
   find "$DVM_ROOT/darts" -maxdepth 1 ! -path "$DVM_ROOT/darts" -type l -exec basename "{}" \; | sort
 }
 
@@ -85,7 +102,7 @@ _dvm_alias_set() {
   fi
 }
 
-dvm_alias_update() {
+_dvm_alias_update() {
   if [[ $# < 2 || "$2" == "--path" && $# < 3 ]]; then
     echo "usage: dvm alias update <alias> [--path] <version>"
     return 1
@@ -100,7 +117,7 @@ dvm_alias_update() {
   _dvm_alias_set "$@"
 }
 
-dvm_alias_create() {
+_dvm_alias_create() {
   if [[ $# < 2 || "$2" == "--path" && $# < 3 ]]; then
     echo "usage: dvm alias create <alias> [--path] <version>"
     return 1
@@ -118,7 +135,7 @@ dvm_alias_create() {
   _dvm_alias_set "$@"
 }
 
-dvm_alias_delete() {
+_dvm_alias_delete() {
   if [[ $# < 1 ]]; then
     echo "usage: dvm alias delete <alias>"
     return 1
@@ -130,7 +147,7 @@ dvm_alias_delete() {
   rm -f -- "$DVM_ROOT/darts/$1"
 }
 
-dvm_alias() {
+_dvm_alias() {
   if [[ $# < 1 ]]; then
     _dvm_alias_usage
     return 1
@@ -139,16 +156,16 @@ dvm_alias() {
   shift
   case $cmd in
     create)
-      dvm_alias_create "$@"
+      _dvm_alias_create "$@"
       ;;
     delete)
-      dvm_alias_delete "$@"
+      _dvm_alias_delete "$@"
       ;;
     list)
-      dvm_alias_list "$@"
+      _dvm_alias_list "$@"
       ;;
     update)
-      dvm_alias_update "$@"
+      _dvm_alias_update "$@"
       ;;
     *)
       _dvm_alias_usage
@@ -157,14 +174,27 @@ dvm_alias() {
   esac
 }
 
-dvm_use() {
+_dvm_use() {
   if [[ $# < 1 ]]; then
+    _dvm_check_fzf || return 1
+
+    local version=$(_dvm_list | fzf --no-multi --tac)
+    local default=''
+  elif [[ $# == 1 ]] && [[ "$1" == "--default" ]]; then
+    _dvm_check_fzf || exit 1;
+
+    local version=$(_dvm_list | fzf --no-multi --tac)
+    local default="--default"
+  elif [[ $# == 2 ]] && [[ "$1" == "--default" ]]; then
+    local version="$2"
+    local default="$1"
+  elif [[ $# > 2 ]]; then
     echo "usage: dvm use <version> [--default]"
     return 1
+  else
+    local version="$1"
+    local default="$2"
   fi
-
-  local version=$1
-  local default=$2
   shift
 
   if [[ ! -e "$DVM_ROOT/darts/$version" ]]; then
@@ -183,23 +213,29 @@ dvm_use() {
   _dvm_path_prepend "$DVM_ROOT/darts/$version/bin"
 }
 
-dvm_list() {
+_dvm_list() {
   find "$DVM_ROOT/darts" -maxdepth 1 ! -path "$DVM_ROOT/darts" -type d \
       -exec basename "{}" \; | sort -V
 }
 
 _dvm_list_repo() {
-  local channel=$1
+  local channel="$1"
   local api_uri="https://www.googleapis.com/storage/v1/b/dart-archive/o"
   local query="prefix=channels/$channel/release/&delimiter=/"
-  curl -s "$api_uri?$query" | \
+  local cache_file="$DVM_ROOT/cache/versions-$channel"
+  if [ ! -f "$cache_file" ] || [[ $(($(date +%s) - $(date -r "$cache_file" +%s))) -gt 300 ]]; then
+    curl -s "$api_uri?$query" | \
       grep "channels/$channel/release/" | \
       sed -e "s@.*/$channel/release/@@;s@/.*@@" | \
       grep -v "^[0-9]*$" | \
-      sort -V
+      sort -V | \
+      tee "$cache_file"
+  else
+    cat "$cache_file"
+  fi
 }
 
-dvm_listall() {
+_dvm_listall() {
   if [[ "$1" == "--dev" ]]; then
     _dvm_list_repo "dev"
   elif [[ "$1" == "--beta" ]]; then
@@ -270,10 +306,16 @@ _macos_dartium_arch() {
   fi
 }
 
-dvm_install() {
+_dvm_install() {
   if [[ $# < 1 ]]; then
+    _dvm_check_fzf || return 1
+
+    local version=$(_dvm_listall | fzf --no-multi --tac)
+  elif [[ $# > 1 ]]; then
     echo "usage: dvm install <version>"
     return 1
+  else
+    local version="$1"
   fi
 
   curl=$(which curl)
@@ -282,7 +324,6 @@ dvm_install() {
     return 1
   fi
 
-  local version=$1
   shift
 
   if [[ -d "$DVM_ROOT/darts/$version" ]]; then
@@ -431,7 +472,7 @@ _dvm_needsupgrade() {
   return 1
 }
 
-dvm_upgrade() {
+_dvm_upgrade() {
   # Abort if there are local diffs that aren't checked in.
   local diffs="$(git -C "$DVM_ROOT" status --porcelain=v1 2>/dev/null)"
   if [[ -n "$diffs" ]]; then
@@ -459,11 +500,11 @@ dvm_upgrade() {
   return 0
 }
 
-dvm_version() {
+_dvm_version() {
   echo "Dart Version Manager version $DVM_VERSION installed at $DVM_ROOT"
 }
 
-dvm_implode() {
+_dvm_implode() {
   echo "This will delete dvm and all installed versions."
   echo -n "Are you sure? "
   read yn
@@ -502,28 +543,28 @@ dvm() {
   shift
   case $cmd in
     alias)
-      dvm_alias "$@"
+      _dvm_alias "$@"
       ;;
     implode)
-      dvm_implode "$@"
+      _dvm_implode "$@"
       ;;
     install)
-      dvm_install "$@"
+      _dvm_install "$@"
       ;;
     list)
-      dvm_list "$@"
+      _dvm_list "$@"
       ;;
     listall)
-      dvm_listall "$@"
+      _dvm_listall "$@"
       ;;
     upgrade)
-      dvm_upgrade "$@"
+      _dvm_upgrade "$@"
       ;;
     use)
-      dvm_use "$@"
+      _dvm_use "$@"
       ;;
     version)
-      dvm_version "$@"
+      _dvm_version "$@"
       ;;
     *)
       if [[ $(type -t dvm_$cmd) == "function" ]]; then
@@ -534,6 +575,10 @@ dvm() {
       ;;
   esac
 }
+
+if [ -n "${BASH_VERSION}" ]; then
+  . "$DVM_ROOT/scripts/bash-completion.sh"
+fi
 
 if [[ -e "$DVM_ROOT/environments/default" ]]; then
   . "$DVM_ROOT/environments/default"

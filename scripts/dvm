@@ -272,7 +272,7 @@ _macos_dartium_arch() {
 
 dvm_install() {
   if [[ $# < 1 ]]; then
-    echo "usage: dvm install <version>"
+    echo "usage: dvm install <version> <channel>"
     return 1
   fi
 
@@ -283,6 +283,7 @@ dvm_install() {
   fi
 
   local version=$1
+  local channel=$2
   shift
 
   if [[ -d "$DVM_ROOT/darts/$version" ]]; then
@@ -330,9 +331,15 @@ dvm_install() {
   pushd $tmpdir > /dev/null
 
   # Download SDK.
-  for channel in "stable" "beta" "dev"; do
-    _dvm_download_sdk "$channel" "$version" "$sdk_archive" && break
-  done
+  # use channel if defined, otherwise loop through all channels
+  if [[ -z "$channel" ]]; then
+    for channel in "stable" "beta" "dev"; do
+      _dvm_download_sdk "$channel" "$version" "$sdk_archive" && break
+    done
+  else
+    _dvm_download_sdk "$channel" "$version" "$sdk_archive"
+  fi
+
   if [[ $? -ne 0 ]]; then
     echo "ERROR: unable to download Dart SDK. Are you sure that version exists?"
     popd > /dev/null

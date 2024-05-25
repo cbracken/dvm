@@ -214,7 +214,14 @@ _dvm_download_sdk() {
   local version=$2
   local sdk_archive=$3
 
-  local dl_uri="https://storage.googleapis.com/dart-archive/channels/$channel/release"
+  local suffix
+  if [[ "$channel" == "main" ]]; then
+    suffix="raw" 
+  else
+    suffix="release" 
+  fi
+
+  local dl_uri="https://storage.googleapis.com/dart-archive/channels/$channel/$suffix"
   local base_uri="$dl_uri/$version"
   echo "Downloading: $base_uri/sdk/$sdk_archive"
   curl -f -O "$base_uri/sdk/$sdk_archive"

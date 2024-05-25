@@ -483,6 +483,11 @@ dvm_implode() {
 }
 
 dvm() {
+  # wrap with subshell to avoid changing the shell's current directory
+  (_dvm "$@")
+}
+
+_dvm() {
   if [[ -z "$DVM_ROOT" ]]; then
     echo "ERROR: DVM_ROOT not set. Please source \$DVM_ROOT/scripts/dvm."
     return 1

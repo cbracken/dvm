@@ -6,12 +6,12 @@ A minimal tool for managing Dart SDK versions.
 ## Installing
 
 In your home directory, run:
-```
+```sh
 git clone https://github.com/cbracken/dvm.git .dvm
 ```
 
 Add the following to your `.bashrc` or `.zshrc`:
-```
+```sh
 if [[ -f ~/.dvm/scripts/dvm ]]; then
   . ~/.dvm/scripts/dvm
 fi
@@ -38,7 +38,7 @@ Commands:
 
 To remove dvm and all installed Dart versions:
 
-```
+```sh
 dvm implode
 ```
 

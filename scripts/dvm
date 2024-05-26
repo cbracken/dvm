@@ -216,9 +216,9 @@ _dvm_download_sdk() {
 
   local suffix
   if [[ "$channel" == "main" ]]; then
-    suffix="raw" 
+    suffix="raw"
   else
-    suffix="release" 
+    suffix="release"
   fi
 
   local dl_uri="https://storage.googleapis.com/dart-archive/channels/$channel/$suffix"
@@ -279,7 +279,7 @@ _macos_dartium_arch() {
 
 dvm_install() {
   if [[ $# < 1 ]]; then
-    echo "usage: dvm install <version> <channel>"
+    echo "usage: dvm install <version> [channel]"
     return 1
   fi
 
@@ -338,7 +338,7 @@ dvm_install() {
   pushd $tmpdir > /dev/null
 
   # Download SDK.
-  # use channel if defined, otherwise loop through all channels
+  # Use channel if defined, otherwise loop through all channels.
   if [[ -z "$channel" ]]; then
     for channel in "stable" "beta" "dev"; do
       _dvm_download_sdk "$channel" "$version" "$sdk_archive" && break
@@ -490,7 +490,7 @@ dvm_implode() {
 }
 
 dvm() {
-  # wrap with subshell to avoid changing the shell's current directory
+  # Wrap with subshell to avoid changing the shell's current directory.
   (_dvm "$@")
 }
 

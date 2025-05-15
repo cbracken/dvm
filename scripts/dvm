@@ -327,6 +327,11 @@ dvm_install() {
       local content_shell_archive=content_shell-linux-x64-release.zip
       local dartium_archive=dartium-linux-x64-release.zip
       ;;
+    MINGW*|MSYS*|CYGWIN*|Windows_NT*|*NT-*)
+      local sdk_archive=dartsdk-windows-x64-release.zip
+      local content_shell_archive=content_shell-windows-x64-release.zip
+      local dartium_archive=dartium-windows-x64-release.zip
+      ;;
     *)
       echo "ERROR: unable to determine OS."
       return 1
